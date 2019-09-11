@@ -1,6 +1,7 @@
 const express = require("express");
 
 const db = require("../data/db-config.js");
+const Users = require("./user-model");
 
 const router = express.Router();
 
@@ -85,12 +86,12 @@ router.delete("/:id", (req, res) => {
 
 router.get("/:id/posts", (req, res) => {
   const { id } = req.params;
-
-  db("posts as p")
-    .join("uses as u", "u.id", "=", "p.user_id")
-    .where({ user_id: id })
-    .then(posts => res.status(200).json(posts))
-    .catch(error => res.send(error));
+  Users.findUserPosts(id)
+    .then(posts => {
+      res.status(200).json(posts);
+    })
+    .catch(() => {
+      res.status(500).json({ error: "DB is broken lol" });
+    });
 });
-
 module.exports = router;
